@@ -8,8 +8,4 @@ class Login extends Model
     protected $table = "login";
     protected $fillable = [];
 
-    public function process(array $data)
-    {
-        dd($data);
-    }
 }

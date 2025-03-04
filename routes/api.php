@@ -2,6 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::post("/login", function () {
-    return response()->json(['message' => 'API funcionando no Windows!']);
+Route::controller(ApiLoginController::class)->group(function () {
+    Route::post('/login', 'App\Http\Controllers\ApiLoginController@validate');
 });

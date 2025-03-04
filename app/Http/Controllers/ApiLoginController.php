@@ -2,64 +2,35 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Login;
+use App\Models\Login,
+    App\Models\Usuario;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class ApiLoginController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function validate(Request $request)
     {
-        //
-    }
+        $data = $request->all();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        dd($request);
-    }
+        $request->validate([
+            'email' => 'required|email',
+            'senha' => 'required|min:6',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Login $login)
-    {
-        //
-    }
+        $usuario = Usuario::where('email', $request->email)->first();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Login $login)
-    {
-        //
-    }
+        dd($usuario);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Login $login)
-    {
-        //
-    }
+        if (!$usuario || !Hash::check($request->senha, $usuario->senha)) {
+            return response()->json(['error' => 'Credenciais inválidas'], 401);
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Login $login)
-    {
-        //
+        session(['usuario' => $usuario]);
+
+        return response()->json(['message' => 'Login bem-sucedido', 'usuario' => $usuario]);
+
     }
 }

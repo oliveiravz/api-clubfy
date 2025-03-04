@@ -2,6 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
+Route::controller(ApiLoginController::class)->group(function () {
+    Route::post('/login', 'App\Http\Controllers\ApiLoginController@validate');
 });

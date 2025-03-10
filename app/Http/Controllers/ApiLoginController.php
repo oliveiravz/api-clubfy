@@ -11,14 +11,14 @@ use Illuminate\Support\Facades\Auth,
 class ApiLoginController extends Controller
 {
     public function validate(Request $request)
-    {
+    {  
+
         try {
             
             $data = $request->all();
 
             $erros = [];
-            
-            var_dump($data);exit;
+
             if(empty($data["email"])) {
                 throw new \Exception("E-mail é um campo obrigatório");
             }
@@ -29,27 +29,33 @@ class ApiLoginController extends Controller
 
             $user = Login::join('usuario','usuario.id','=','login.usuario_id')
                     ->where('login.email', trim($data['email']))
-                    ->select('login.*', 'usuario.*')
-                    ->first();
-                    
-            if (!$user || ($user->senha !== md5($data['password']))) {
+                    ->select('login.email', 'login.senha', 'usuario.nome', 'usuario.nivel_acesso')
+                    ->first()->toArray();
+
+            if (!$user || ($user["senha"] !== md5($data['password']))) {
                 throw new \Exception('Usuário não encontrado!');
+            }else{
+
+                unset($user["senha"]);
+                
+                $content = [
+                    'success' => true,
+                    'status_code' => 200,
+                    'user' => $user
+                ];
             }
     
-            session(['usuario_logado' => $user]);
-    
-            return response()->json(['message' => 'Login bem-sucedido', 'usuario_logado' => $user]);
+            return response()->json($content);
 
         } catch (\Exception $e) {
-            
-            return response()->json([
-                'success'     => false,
-                'message'     => 'Erro ao processar a solicitação. Por favor, tente novamente mais tarde.',
-                'error'       => mb_convert_encoding($e->getMessage(), 'UTF-8', 'auto'), 
-            ], 500);
-            
-            
-        }
 
+            $content = [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'status_code' => 500
+            ];
+            
+            return response()->json($content);
+        }
     }
 }
